@@ -1,6 +1,6 @@
 {
   "name": "lean-jira-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lean, agent-first MCP server for JIRA Cloud",
   "license": "MIT",
   "author": "Wiktor Jarka <wiktor@jarka.pl>",
@@ -10,7 +10,13 @@
   },
   "homepage": "https://github.com/wjarka/lean-jira-mcp#readme",
   "bugs": "https://github.com/wjarka/lean-jira-mcp/issues",
-  "keywords": ["jira", "mcp", "model-context-protocol", "atlassian", "agent"],
+  "keywords": [
+    "jira",
+    "mcp",
+    "model-context-protocol",
+    "atlassian",
+    "agent"
+  ],
   "type": "module",
   "bin": {
     "lean-jira-mcp": "./dist/index.js"
