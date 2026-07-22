@@ -22,6 +22,17 @@ async function configEnvVars(): Promise<string[]> {
   return [...new Set([...src.matchAll(/env\.(JIRA_[A-Z0-9_]+)/g)].map((m) => m[1]!))];
 }
 
+test("the version is one value in three places: package.json, manifest.json, server identity", async () => {
+  // `npm version` bumps only package.json; the "version" lifecycle script
+  // (scripts/sync-version.ts) rewrites the other two. This pins the sync so a
+  // manual edit or a non-npm bump can't ship a bundle that advertises the
+  // wrong version.
+  const manifest = (await Bun.file(new URL("../manifest.json", import.meta.url)).json()) as any;
+  expect(manifest.version).toBe(pkg.version);
+  const serverSrc = await Bun.file(new URL("../src/core/server.ts", import.meta.url)).text();
+  expect(serverSrc).toContain(`version: "${pkg.version}",`);
+});
+
 test("the bin is the Bun-built bundle, with a build step to produce it", () => {
   expect(pkg.bin["lean-jira-mcp"]).toBe("./dist/index.js");
   expect(pkg.scripts.build).toMatch(/scripts\/build\.ts/);

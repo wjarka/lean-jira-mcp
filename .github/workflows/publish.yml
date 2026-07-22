@@ -1,0 +1,50 @@
+# Publish to npm on a version tag (v*), via npm trusted publishing (OIDC):
+# no token secret, no OTP — npmjs.com is configured to trust this exact
+# workflow file in this repo (package settings → Trusted Publisher). npm
+# generates provenance attestations automatically on this path.
+#
+# Release flow: `npm version patch|minor|major` locally (the "version" script
+# syncs manifest.json + server.ts into the bump commit), then
+# `git push origin main --follow-tags` — the tag triggers this workflow.
+name: Publish to npm
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write # OIDC for npm trusted publishing + provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing requires npm >= 11.5.1.
+      - run: npm install -g npm@latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Tag must match package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "tag v$TAG does not match package.json version $PKG" >&2
+            exit 1
+          fi
+
+      - run: bun run typecheck
+      - run: bun test
+
+      # prepublishOnly runs `bun run build`, producing dist/index.js.
+      - run: npm publish

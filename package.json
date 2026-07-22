@@ -38,6 +38,7 @@
     "test": "bun test",
     "build": "bun run scripts/build.ts",
     "build:mcpb": "bun run scripts/build.ts && bun run scripts/pack-mcpb.ts",
+    "version": "bun run scripts/sync-version.ts && git add manifest.json src/core/server.ts",
     "prepublishOnly": "bun run build"
   },
   "dependencies": {

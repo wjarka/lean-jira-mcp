@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "lean-jira-mcp",
   "display_name": "JIRA MCP (agent-first)",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lean, agent-first MCP server for JIRA Cloud: ~10 intent-shaped tools with markdown I/O and recovery hints.",
   "long_description": "A small, opinionated MCP server for JIRA Cloud. It exposes a handful of intent-shaped tools (search, read/create/update issues, transition, comment, describe project, read and attach files) instead of a 1:1 REST mapping, flattens rich text to markdown on read and accepts markdown on write, resolves human-friendly references (emails, \"me\", status names) server-side, and stamps every response with recovery hints. Authentication is a JIRA Cloud email + API token supplied via host-managed environment — never via tool arguments.",
   "author": {

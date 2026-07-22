@@ -71,7 +71,7 @@ export function createServer(deps: ServerDeps): McpServer {
   const server = new McpServer(
     {
       name: "lean-jira-mcp",
-      version: "0.1.0",
+      version: "0.1.1",
     },
     {
       instructions: buildServerInstructions(deps.searchDeps.projectDefault),
