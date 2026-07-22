@@ -1,0 +1,125 @@
+{
+  "manifest_version": "0.3",
+  "name": "lean-jira-mcp",
+  "display_name": "JIRA MCP (agent-first)",
+  "version": "0.1.0",
+  "description": "Lean, agent-first MCP server for JIRA Cloud: ~10 intent-shaped tools with markdown I/O and recovery hints.",
+  "long_description": "A small, opinionated MCP server for JIRA Cloud. It exposes a handful of intent-shaped tools (search, read/create/update issues, transition, comment, describe project, read and attach files) instead of a 1:1 REST mapping, flattens rich text to markdown on read and accepts markdown on write, resolves human-friendly references (emails, \"me\", status names) server-side, and stamps every response with recovery hints. Authentication is a JIRA Cloud email + API token supplied via host-managed environment — never via tool arguments.",
+  "author": {
+    "name": "Wiktor Jarka",
+    "email": "wiktor@jarka.pl"
+  },
+  "license": "MIT",
+  "keywords": ["jira", "mcp", "atlassian", "agent"],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "JIRA_BASE_URL": "${user_config.base_url}",
+        "JIRA_EMAIL": "${user_config.email}",
+        "JIRA_API_TOKEN": "${user_config.api_token}",
+        "JIRA_PROJECT_DEFAULT": "${user_config.project_default}",
+        "JIRA_MCP_COMMENT_MARKER": "${user_config.comment_marker}",
+        "JIRA_FIELD_STORY_POINTS": "${user_config.field_story_points}",
+        "JIRA_FIELD_SPRINT": "${user_config.field_sprint}",
+        "JIRA_FIELD_EPIC_LINK": "${user_config.field_epic_link}",
+        "JIRA_MCP_ATTACHMENT_MAX_BYTES": "${user_config.attachment_max_bytes}",
+        "JIRA_ATTACHMENT_ROOT": "${user_config.attachment_root}",
+        "JIRA_MCP_ATTACHMENT_UPLOAD_MAX_BYTES": "${user_config.attachment_upload_max_bytes}"
+      }
+    }
+  },
+  "user_config": {
+    "base_url": {
+      "type": "string",
+      "title": "JIRA base URL",
+      "description": "Your JIRA Cloud site, e.g. https://your-domain.atlassian.net",
+      "required": true
+    },
+    "email": {
+      "type": "string",
+      "title": "Atlassian account email",
+      "description": "The email of the account whose API token you use (HTTP basic auth).",
+      "required": true
+    },
+    "api_token": {
+      "type": "string",
+      "title": "API token (classic, unscoped)",
+      "description": "Create at id.atlassian.com with \"Create API token\" — NOT \"with scopes\". A scoped token fails basic auth and silently returns empty results.",
+      "required": true,
+      "sensitive": true
+    },
+    "project_default": {
+      "type": "string",
+      "title": "Default project key",
+      "description": "Project key used when jira_create_issue is called without an explicit project (e.g. PROJ).",
+      "required": false
+    },
+    "comment_marker": {
+      "type": "string",
+      "title": "Agent comment marker",
+      "description": "Visible marker prefixed to every comment the agent posts, so humans can spot them in the JIRA UI.",
+      "required": false,
+      "default": ":claude:"
+    },
+    "field_story_points": {
+      "type": "string",
+      "title": "Story Points field id (advanced)",
+      "description": "Custom-field id backing Story Points. Auto-detected per instance at startup — set this only if detection misses (the server logs a warning naming any omitted field).",
+      "required": false
+    },
+    "field_sprint": {
+      "type": "string",
+      "title": "Sprint field id (advanced)",
+      "description": "Custom-field id backing Sprint. Auto-detected per instance at startup — set this only if detection misses (the server logs a warning naming any omitted field).",
+      "required": false
+    },
+    "field_epic_link": {
+      "type": "string",
+      "title": "Epic Link field id (advanced)",
+      "description": "Custom-field id backing Epic Link. Auto-detected per instance at startup — set this only if detection misses (the server logs a warning naming any omitted field).",
+      "required": false
+    },
+    "attachment_max_bytes": {
+      "type": "string",
+      "title": "Attachment read ceiling in bytes (advanced)",
+      "description": "Hard byte ceiling for jira_read_attachment — a file larger than this is refused before download (a note + download URL is returned instead). Defaults to 25 MB.",
+      "required": false,
+      "default": "26214400"
+    },
+    "attachment_root": {
+      "type": "string",
+      "title": "Attachment upload roots (advanced)",
+      "description": "Path-delimiter-separated list of directories jira_add_attachment may upload FROM. A path resolving outside all roots (after symlink/.. resolution) is refused, blocking exfiltration of files like ~/.ssh. Defaults cover only agent-produced dirs (project dir + OS temp dirs); a dir holding personal files (e.g. ~/Downloads) is a deliberate opt-in.",
+      "required": false
+    },
+    "attachment_upload_max_bytes": {
+      "type": "string",
+      "title": "Attachment upload size cap in bytes (advanced)",
+      "description": "Size cap for jira_add_attachment — a larger file is refused with a hint instead of a raw 413. Defaults to 25 MB. JIRA's own per-instance limit may be lower.",
+      "required": false,
+      "default": "26214400"
+    }
+  },
+  "tools": [
+    { "name": "jira_search", "description": "Search issues with raw JQL; returns compact cards with opaque-cursor pagination." },
+    { "name": "jira_get_issue", "description": "Read one issue at summary or full detail, with curated agile fields and optional comments." },
+    { "name": "jira_create_issue", "description": "Create an issue from a summary (project/type defaulted); returns key and URL." },
+    { "name": "jira_update_issue", "description": "Partial issue update with add/remove/replace deltas for multi-value fields." },
+    { "name": "jira_transition", "description": "Transition an issue by transition name or target status, with proactive screen-field validation." },
+    { "name": "jira_comment", "description": "Post or edit a comment as markdown; auto-stamps agent authorship." },
+    { "name": "jira_get_comments", "description": "Read a comment thread (full bodies) with authoredBy resolution and since-last-agent-comment delta." },
+    { "name": "jira_describe_project", "description": "Discover a project's issue types, statuses, and named transition graph." },
+    { "name": "jira_read_attachment", "description": "Read one attachment by id: images come back downscaled as image blocks, text token-budgeted, PDFs as server-extracted text (page-budgeted via pageRange), other types as metadata + download note." },
+    { "name": "jira_add_attachment", "description": "Attach one local file to an issue by path (the file must exist on disk). Paths are scoped to safe roots, MIME is detected from content, same-name dupes are refused unless allowDuplicate is set." }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}

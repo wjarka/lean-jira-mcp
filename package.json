@@ -1,0 +1,48 @@
+{
+  "name": "lean-jira-mcp",
+  "version": "0.1.0",
+  "description": "Lean, agent-first MCP server for JIRA Cloud",
+  "license": "MIT",
+  "author": "Wiktor Jarka <wiktor@jarka.pl>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wjarka/lean-jira-mcp.git"
+  },
+  "homepage": "https://github.com/wjarka/lean-jira-mcp#readme",
+  "bugs": "https://github.com/wjarka/lean-jira-mcp/issues",
+  "keywords": ["jira", "mcp", "model-context-protocol", "atlassian", "agent"],
+  "type": "module",
+  "bin": {
+    "lean-jira-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "manifest.json",
+    "README.md",
+    "DESIGN.md",
+    "LICENSE",
+    ".env.example"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "build": "bun run scripts/build.ts",
+    "build:mcpb": "bun run scripts/build.ts && bun run scripts/pack-mcpb.ts",
+    "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "jimp": "^1.6.1",
+    "unpdf": "^1.6.2",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "pdf-lib": "^1.17.1",
+    "typescript": "^5.5.0"
+  }
+}

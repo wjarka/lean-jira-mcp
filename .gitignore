@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.mcpb
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Local benchmark recordings (may contain real JIRA data — never commit)
+mcp-bench/
+
+# OS
+.DS_Store
+
+# Editor
+.idea/
+*.swp
+
+# Local agent workflow (working notes, skills, per-user agent config) — the
+# maintainer's personal setup, read from disk, not part of the public repo.
+.scratch/
+.agents/
+.claude
+CLAUDE.md
+skills-lock.json
+docs/agents/
