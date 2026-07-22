@@ -78,7 +78,43 @@ curl -s -u "$JIRA_EMAIL:$JIRA_API_TOKEN" \
 
 ## Install
 
-### Option A — `npx` (any MCP client)
+### Claude Code
+
+```sh
+claude mcp add jira \
+  -e JIRA_BASE_URL=https://your-domain.atlassian.net \
+  -e JIRA_EMAIL=you@example.com \
+  -e JIRA_API_TOKEN=your-api-token \
+  -- npx -y lean-jira-mcp
+```
+
+Default scope is `local` (this project only); add `-s user` before `--` to make
+it available in all your projects.
+
+### Codex CLI
+
+```sh
+codex mcp add jira \
+  --env JIRA_BASE_URL=https://your-domain.atlassian.net \
+  --env JIRA_EMAIL=you@example.com \
+  --env JIRA_API_TOKEN=your-api-token \
+  -- npx -y lean-jira-mcp
+```
+
+Or edit `~/.codex/config.toml` directly:
+
+```toml
+[mcp_servers.jira]
+command = "npx"
+args = ["-y", "lean-jira-mcp"]
+
+[mcp_servers.jira.env]
+JIRA_BASE_URL = "https://your-domain.atlassian.net"
+JIRA_EMAIL = "you@example.com"
+JIRA_API_TOKEN = "your-api-token"
+```
+
+### Any other MCP client — `npx`
 
 No manual build: the published package ships a self-contained, Node-runnable bin.
 Point your client's MCP config at it and supply credentials via `env`:
@@ -104,7 +140,7 @@ Point your client's MCP config at it and supply credentials via `env`:
 (In Claude Desktop this lives in `claude_desktop_config.json`. Only the first
 three env vars are required; the rest are optional.)
 
-### Option B — `.mcpb` bundle (one-click, Claude Desktop)
+### Claude Desktop — `.mcpb` bundle (one-click)
 
 Build the bundle, then open it in Claude Desktop (Settings → Extensions, or
 double-click the `.mcpb` file). Claude Desktop prompts for the configuration
