@@ -30,12 +30,14 @@
     ".env.example"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "scripts": {
     "start": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
+    "test:node": "node scripts/smoke-node.mjs",
+    "test:runtimes": "node --test scripts/update-runtimes.test.mjs",
     "build": "bun run scripts/build.ts",
     "build:mcpb": "bun run scripts/build.ts && bun run scripts/pack-mcpb.ts",
     "version": "bun run scripts/sync-version.ts && git add manifest.json src/core/server.ts",
