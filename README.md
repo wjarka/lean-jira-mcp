@@ -20,8 +20,8 @@ field catalog incl. custom fields), `jira://link-types`.
 ## Requirements
 
 - A JIRA Cloud site + a **classic, unscoped** [API token](https://id.atlassian.com/manage-profile/security/api-tokens) (see below)
-- One of: a host that can run the published bin via `npx` (Node ≥ 18), the
-  one-click `.mcpb` bundle, or [Bun](https://bun.sh) ≥ 1.3 for local development
+- One of: a host that can run the published bin via `npx` (Node ≥ 24), the
+  one-click `.mcpb` bundle (also Node ≥ 24), or [Bun](https://bun.sh) for local development
 
 ## Configuration
 
@@ -173,6 +173,9 @@ npx -y @anthropic-ai/mcpb validate manifest.json
 
 ## Local development
 
+Use the Node LTS version in `.node-version` and the Bun version in `.bun-version`.
+CI checks both Node 24.0.0 (the supported minimum) and the pinned tooling version.
+
 ```sh
 bun install
 cp .env.example .env   # fill in JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN
@@ -181,7 +184,27 @@ bun run start        # serve over stdio
 bun test             # full offline test suite (no network)
 bun run typecheck    # tsc --noEmit
 bun run build        # bundle the Node bin → dist/index.js
+bun run test:node    # smoke-test the built bundle under Node, using a local Jira stub
+bun run test:runtimes # check runtime update selection
 ```
+
+### Dependency and runtime updates
+
+Dependabot checks Bun dependencies (`package.json` and `bun.lock`) and GitHub
+Actions weekly. Minor and patch dependency updates are grouped; major upgrades
+remain separate PRs.
+
+The **Update runtimes** workflow checks the official Node and Bun release feeds
+weekly and opens or refreshes one PR for the latest Node LTS and stable Bun pins.
+It can also be run manually from Actions. It never downgrades a pin or raises
+the minimum supported Node version automatically. The workflow explicitly
+dispatches CI on its branch because PRs created with `GITHUB_TOKEN` do not
+trigger `pull_request` workflows.
+
+These workflows become active once merged to the default branch. In repository
+**Settings → Actions → General → Workflow permissions**, enable **Allow GitHub
+Actions to create and approve pull requests** so runtime PR creation can work.
+The workflow only creates PRs; review and merge updates after CI passes.
 
 ### The Bun `.env` autoload footgun (config can look ignored)
 

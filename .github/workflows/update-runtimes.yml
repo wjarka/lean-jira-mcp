@@ -1,0 +1,50 @@
+name: Update runtimes
+
+on:
+  schedule:
+    - cron: '23 7 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: update-runtimes
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: node scripts/update-runtimes.mjs
+      - uses: peter-evans/create-pull-request@v8
+        id: pr
+        with:
+          branch: automation/update-runtimes
+          delete-branch: true
+          add-paths: |
+            .node-version
+            .bun-version
+          commit-message: 'chore: update Node LTS and Bun'
+          title: 'chore: update Node LTS and Bun'
+          body: |
+            Update tooling to the latest Node LTS and stable Bun releases.
+            The minimum supported Node version remains a deliberate compatibility policy.
+
+            CI is dispatched explicitly because PRs created with GITHUB_TOKEN
+            do not trigger pull_request workflows. Review CI before merging.
+      - name: Run CI on the runtime PR
+        if: steps.pr.outputs.pull-request-number && steps.pr.outputs.pull-request-operation != 'closed'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          UPDATE_BRANCH: ${{ steps.pr.outputs.pull-request-branch }}
+        run: gh workflow run ci.yml --ref "$UPDATE_BRANCH"

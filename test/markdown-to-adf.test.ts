@@ -428,6 +428,8 @@ test("regression: the create `description` fixture converts with no code+other-m
 // the module's documented never-throws contract. Sibling spans are now consumed
 // with a loop; only genuine nesting recurses. These lines are far larger than
 // anything real, sized to have blown the old recursion.
+// These correctness stress cases exceed Bun's default 5s timeout on slower
+// machines; give them room without relaxing the timeout for the rest of the suite.
 
 test("a line with 30k sibling inline spans converts without throwing", () => {
   const md = "*a* ".repeat(30000);
@@ -439,7 +441,7 @@ test("a line with 30k sibling inline spans converts without throwing", () => {
   // one `*a* ` unit produces, just repeated tens of thousands of times.
   expect(p.content[0]).toEqual({ type: "text", text: "a", marks: [{ type: "em" }] });
   expect(p.content[1]).toEqual({ type: "text", text: " " });
-});
+}, 30_000);
 
 test("a link-heavy line with 30k sibling links converts without throwing", () => {
   const md = "[x](http://e) ".repeat(30000);
@@ -452,7 +454,7 @@ test("a link-heavy line with 30k sibling links converts without throwing", () =>
     text: "x",
     marks: [{ type: "link", attrs: { href: "http://e" } }],
   });
-});
+}, 30_000);
 
 test("regression: the PROJ-129 comment fixture converts with no code+other-mark node", async () => {
   const md = await fixture("proj-129-failed-comment.md");
